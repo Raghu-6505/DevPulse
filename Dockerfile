@@ -50,9 +50,13 @@ WORKDIR /app
 COPY --from=backend-deps /app/backend/node_modules ./backend/node_modules
 COPY backend/ ./backend/
 
-# Copy frontend build
-COPY --from=frontend-builder /app/client/.next/standalone ./client/
+# Copy frontend build (Next.js standalone structure)
+# Next.js standalone creates: .next/standalone/ directory
+# Copy the contents of standalone directory directly to client/
+COPY --from=frontend-builder /app/client/.next/standalone/. ./client/
+# Copy static files (standalone references these)
 COPY --from=frontend-builder /app/client/.next/static ./client/.next/static
+# Copy public files
 COPY --from=frontend-builder /app/client/public ./client/public
 
 # Copy start script and nginx config
