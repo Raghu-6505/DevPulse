@@ -47,8 +47,9 @@ echo "Starting frontend on port 3000 from /app/client-standalone..."
 PORT=3000 HOSTNAME=0.0.0.0 node server.js &
 FRONTEND_PID=$!
 
-# Give services a moment to start
-sleep 5
+# Give services more time to fully start (especially Next.js which takes longer)
+echo "Waiting for services to fully start..."
+sleep 8
 
 # Check if services are running
 echo "Checking service health..."
@@ -70,21 +71,49 @@ else
     echo "✓ Frontend is running (PID: $FRONTEND_PID)"
 fi
 
-# Test if services are listening on their ports
-if ! nc -z localhost 8000 2>/dev/null; then
-    echo "WARNING: Backend not listening on port 8000"
-fi
+# Test if services are listening on their ports (with retries)
+echo "Checking port availability..."
+for i in 1 2 3; do
+    if nc -z localhost 8000 2>/dev/null; then
+        echo "✓ Backend is listening on port 8000"
+        break
+    elif [ $i -eq 3 ]; then
+        echo "WARNING: Backend not listening on port 8000 (may still be starting)"
+    else
+        sleep 2
+    fi
+done
 
-if ! nc -z localhost 3000 2>/dev/null; then
-    echo "WARNING: Frontend not listening on port 3000"
-    echo "This might cause 404 errors!"
+for i in 1 2 3; do
+    if nc -z localhost 3000 2>/dev/null; then
+        echo "✓ Frontend is listening on port 3000"
+        break
+    elif [ $i -eq 3 ]; then
+        echo "WARNING: Frontend not listening on port 3000 (may still be starting)"
+    else
+        sleep 2
+    fi
+done
+
+# Verify nginx is listening on 8080
+if nc -z localhost 8080 2>/dev/null; then
+    echo "✓ Nginx is listening on port 8080 (this is the port Render should use)"
 else
-    echo "✓ Frontend is listening on port 3000"
+    echo "ERROR: Nginx not listening on port 8080!"
+    exit 1
 fi
 
-echo "All services started. Nginx routing:"
+echo ""
+echo "=========================================="
+echo "All services started successfully!"
+echo "=========================================="
+echo "Nginx routing (port 8080):"
 echo "  - /api/* -> Backend (localhost:8000)"
 echo "  - /* -> Frontend (localhost:3000)"
+echo ""
+echo "IMPORTANT: Render should use port 8080"
+echo "Set PORT=8080 in Render environment variables"
+echo "=========================================="
 
 # Function to handle shutdown
 cleanup() {
