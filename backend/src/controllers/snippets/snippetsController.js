@@ -30,21 +30,13 @@ export const createSnippet = asyncHandler(async (req, res) => {
       });
     }
 
-    // check if the tags are valid
-    if (
-      !tags ||
-      tags.length === 0 ||
-      !tags.every((tag) => mongoose.Types.ObjectId.isValid(tag))
-    ) {
-      return res.status(400).json({ message: "Please provide valid tags" });
-    }
 
     const snippet = new Snippet({
       title,
       description,
       code,
       language,
-      tags,
+      tags: tags || [], // Default to empty array if tags not provided
       isPublic,
       user: userId,
     });
@@ -219,8 +211,8 @@ export const updateSnippet = asyncHandler(async (req, res) => {
     snippet.description = description || snippet.description;
     snippet.code = code || snippet.code;
     snippet.language = language || snippet.language;
-    snippet.tags = tags || snippet.tags;
-    snippet.isPublic = isPublic || snippet.isPublic;
+    snippet.tags = tags !== undefined ? (tags || []) : snippet.tags; // Allow empty array
+    snippet.isPublic = isPublic !== undefined ? isPublic : snippet.isPublic;
 
     await snippet.save();
 

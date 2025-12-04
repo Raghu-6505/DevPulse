@@ -219,18 +219,20 @@ function Snippet({ snippet, height = "400px" }: Props) {
         </div>
         <div className="pt-2 pb-3 flex justify-between">
           <ul className="items-start flex gap-2 flex-wrap">
-            {snippet?.tags.map((tag) => {
-              return (
-                <li
-                  key={tag._id}
-                  className="tag-item px-4 py-1 border border-rgba-2 text-gray-300 rounded-md cursor-pointer"
-                  style={{ background: useTagColorMemo }}
-                  onClick={() => setActiveTag(tag._id)}
-                >
-                  {tag.name}
-                </li>
-              );
-            })}
+            {snippet?.tags && snippet.tags.length > 0 ? (
+              snippet.tags.map((tag) => {
+                return (
+                  <li
+                    key={tag._id}
+                    className="tag-item px-4 py-1 border border-rgba-2 text-gray-300 rounded-md cursor-pointer"
+                    style={{ background: useTagColorMemo }}
+                    onClick={() => setActiveTag(tag._id)}
+                  >
+                    {tag.name}
+                  </li>
+                );
+              })
+            ) : null}
           </ul>
           {snippet.user?._id === userId && (
             <div className="flex gap-2">

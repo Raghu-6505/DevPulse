@@ -66,7 +66,7 @@ const SnippetSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Tags",
-        required: true,
+        required: false, // Tags are optional
       },
     ],
 
