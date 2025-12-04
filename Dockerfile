@@ -1,8 +1,8 @@
 # Combined Dockerfile for Backend + Frontend
 FROM node:20-alpine AS base
 
-# Install dependencies for running multiple processes, nginx, and envsubst
-RUN apk add --no-cache dumb-init nginx gettext
+# Install dependencies for running multiple processes, nginx, and netcat for health checks
+RUN apk add --no-cache dumb-init nginx gettext netcat-openbsd
 
 WORKDIR /app
 
@@ -51,13 +51,14 @@ COPY --from=backend-deps /app/backend/node_modules ./backend/node_modules
 COPY backend/ ./backend/
 
 # Copy frontend build (Next.js standalone structure)
-# Next.js standalone creates: .next/standalone/ directory
-# Copy the contents of standalone directory directly to client/
-COPY --from=frontend-builder /app/client/.next/standalone/. ./client/
-# Copy static files (standalone references these)
-COPY --from=frontend-builder /app/client/.next/static ./client/.next/static
+# Next.js standalone creates: .next/standalone/ directory with everything needed
+# The standalone directory contains: server.js, .next/, node_modules/, package.json
+# We'll copy the entire standalone directory and run from there
+COPY --from=frontend-builder /app/client/.next/standalone ./client-standalone
+# Copy static files (standalone references .next/static at the same level)
+COPY --from=frontend-builder /app/client/.next/static ./client-standalone/.next/static
 # Copy public files
-COPY --from=frontend-builder /app/client/public ./client/public
+COPY --from=frontend-builder /app/client/public ./client-standalone/public
 
 # Copy start script and nginx config
 COPY start.sh /app/start.sh
