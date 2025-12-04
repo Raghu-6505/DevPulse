@@ -8,7 +8,9 @@ import errorHandler from "./src/helpers/errorhandler.js";
 
 dotenv.config();
 
-const port = process.env.PORT || 8000;
+// Backend always uses port 8000 internally (nginx routes to it)
+// PORT env var is for nginx (8080), not backend
+const port = process.env.BACKEND_PORT || 8000;
 
 const app = express();
 
@@ -44,8 +46,8 @@ const server = async () => {
   try {
     await connect();
 
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`Backend server is running on port ${port}`);
     });
   } catch (error) {
     console.log("Failed to strt server.....", error.message);

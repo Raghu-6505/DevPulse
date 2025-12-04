@@ -1,8 +1,8 @@
 # Combined Dockerfile for Backend + Frontend
 FROM node:20-alpine AS base
 
-# Install dependencies for running multiple processes and nginx
-RUN apk add --no-cache dumb-init nginx
+# Install dependencies for running multiple processes, nginx, and envsubst
+RUN apk add --no-cache dumb-init nginx gettext
 
 WORKDIR /app
 
