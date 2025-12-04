@@ -4,11 +4,26 @@ echo "Starting services..."
 
 # Start nginx (listens on 8080, Render will map its port to 8080)
 echo "Starting nginx on port 8080..."
+
+# Test nginx configuration first
+if ! nginx -t 2>&1; then
+    echo "ERROR: Nginx configuration test failed!"
+    echo "Nginx config:"
+    cat /etc/nginx/nginx.conf
+    exit 1
+fi
+
 nginx -g "daemon off;" &
 NGINX_PID=$!
 
-# Wait a moment for nginx to start
+# Wait a moment for nginx to start and verify it's running
 sleep 2
+if ! kill -0 $NGINX_PID 2>/dev/null; then
+    echo "ERROR: Nginx failed to start!"
+    exit 1
+else
+    echo "✓ Nginx is running (PID: $NGINX_PID)"
+fi
 
 # Start backend in background with explicit port (not using PORT env var)
 echo "Starting backend on port 8000..."
