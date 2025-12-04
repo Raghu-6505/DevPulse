@@ -46,8 +46,10 @@ const server = async () => {
   try {
     await connect();
 
-    app.listen(port, '0.0.0.0', () => {
-      console.log(`Backend server is running on port ${port}`);
+    // Backend should only listen on localhost (127.0.0.1) so Render doesn't detect it
+    // Only nginx (port 8080) should be exposed externally
+    app.listen(port, '127.0.0.1', () => {
+      console.log(`Backend server is running on port ${port} (localhost only)`);
     });
   } catch (error) {
     console.log("Failed to strt server.....", error.message);
