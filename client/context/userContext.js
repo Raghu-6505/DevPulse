@@ -9,7 +9,8 @@ const UserContext = React.createContext();
 axios.defaults.withCredentials = true;
 
 export const UserContextProvider = ({ children }) => {
-  const serverUrl = "http://localhost:8000";
+  // Use environment variable for API URL, fallback to localhost for development
+  const serverUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || "http://localhost:8000";
 
   const router = useRouter();
 
