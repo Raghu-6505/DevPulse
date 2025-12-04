@@ -14,8 +14,13 @@ const SnippetsContext = createContext();
 
 export const SnippetsProvider = ({ children }) => {
   const { closeModal } = useGlobalContext();
-  // Use environment variable for API URL, fallback to localhost for development
-  const serverUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+  // Use environment variable for API URL, or relative URL (works with nginx routing)
+  // In production, nginx routes /api/* to backend, so we can use relative URLs
+  // For local dev, use localhost
+  const isProduction = process.env.NODE_ENV === 'production';
+  const serverUrl = isProduction 
+    ? '/api/v1' // Use relative URLs in production (nginx handles routing)
+    : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1");
 
   const userId = useUserContext().user?._id;
 

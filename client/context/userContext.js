@@ -9,8 +9,13 @@ const UserContext = React.createContext();
 axios.defaults.withCredentials = true;
 
 export const UserContextProvider = ({ children }) => {
-  // Use environment variable for API URL, fallback to localhost for development
-  const serverUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || "http://localhost:8000";
+  // Use environment variable for API URL, or relative URL (works with nginx routing)
+  // In production, nginx routes /api/* to backend, so we can use relative URLs
+  // For local dev, use localhost
+  const isProduction = process.env.NODE_ENV === 'production';
+  const serverUrl = isProduction 
+    ? '' // Use relative URLs in production (nginx handles routing)
+    : (process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || "http://localhost:8000");
 
   const router = useRouter();
 
